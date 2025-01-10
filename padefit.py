@@ -65,19 +65,19 @@ def fit(
 
     Returns:
 
-            [sol_f0_lst, roots_num_lst, roots_den_lst, chi_square_lst, residues_lst]
+            [sol_f0_lst, roots_num_arr_lst, roots_den_arr_lst, chi_square_lst, residues_arr_lst]
 
                WHERE
 
                sol_f0_lst (list of lambda functions):        Pade' approximant for chi
 
-               roots_num_lst (list of comples numpy arrays): zeros of the numerator (remapped to real mu)
+               roots_num_arr_lst (list of comples numpy arrays): zeros of the numerator (remapped to real mu)
 
-               roots_den_lst (list of comples numpy arrays)  zeros of the denominator (remapped to real mu)
+               roots_den_arr_lst (list of comples numpy arrays)  zeros of the denominator (remapped to real mu)
 
-               chi_square_lst (list of float numpy arrays)   chi2/ndof
+               chi_square_lst (list of floats)               chi2/ndof
 
-               residues_lst (list of comples numpy arrays)   complex residues
+               residues_arr_lst (list of comples numpy arrays)   complex residues
 
     """
 
@@ -149,11 +149,11 @@ def fit(
     mylhs = f * (q.as_expr())
 
     sol_f0_lst = []
-    # sol_f1_lst = []
-    roots_num_lst = []
-    roots_den_lst = []
+    # sol_f1_arr_lst = []
+    roots_num_arr_lst = []
+    roots_den_arr_lst = []
     chi_square_lst = []
-    residues_lst = []
+    residues_arr_lst = []
 
     for current_sample in np.arange(nsamples):
         if verbosity > 0:
@@ -285,13 +285,13 @@ def fit(
         # sol_f1 = sp.lambdify(x, sp.diff(mypq, (x, 1)))
 
         sol_f0_lst.append(sol_f0)
-        # sol_f1_lst.append(sol_f1)
+        # sol_f1_arr_lst.append(sol_f1)
 
         roots_num = np.roots(myp).astype(complex)
         roots_den = np.roots(myq).astype(complex)
 
-        roots_num_lst.append(roots_num)
-        roots_den_lst.append(roots_den)
+        roots_num_arr_lst.append(roots_num)
+        roots_den_arr_lst.append(roots_den)
 
         chi_square = mychi2fun_v(sol)
 
@@ -307,7 +307,7 @@ def fit(
             myfact = myfact * (-1.0j)
         (residues, _, _) = signal.residue(myp, myq)
 
-        residues_lst.append(residues)
+        residues_arr_lst.append(residues)
 
         if verbosity > 2:
             print_to_buffer("=== zeros (remapped to real mu) ===")
@@ -325,10 +325,10 @@ def fit(
 
     return [
         sol_f0_lst,
-        [1.0j * x for x in roots_num_lst],
-        [1.0j * x for x in roots_den_lst],
+        [1.0j * x for x in roots_num_arr_lst],
+        [1.0j * x for x in roots_den_arr_lst],
         chi_square_lst,
-        residues_lst,
+        residues_arr_lst,
     ]
 
 
@@ -352,7 +352,7 @@ def mpfit(
     global my_task
 
     def my_task(my_task_args):
-        [_, roots_num_lst, roots_den_lst, chi_square_lst, residues_lst] = fit(
+        [_, roots_num_arr_lst, roots_den_arr_lst, chi_square_lst, residues_arr_lst] = fit(
             mu_in,
             chis_in,
             dchis_in,
@@ -365,7 +365,7 @@ def mpfit(
             verbosity=verbosity,
         )
 
-        return [roots_num_lst, roots_den_lst, chi_square_lst, residues_lst]
+        return [roots_num_arr_lst, roots_den_arr_lst, chi_square_lst, residues_arr_lst]
 
     ntasks = min(ntasks, nsamples)
 
@@ -393,18 +393,18 @@ def mpfit(
     with Pool(ntasks) as p:
         res = p.map(my_task, my_task_args)
 
-    roots_num_lst = []
-    roots_den_lst = []
+    roots_num_arr_lst = []
+    roots_den_arr_lst = []
     chi_square_lst = []
-    residues_lst = []
+    residues_arr_lst = []
 
     for task_id in np.arange(ntasks):
-        roots_num_lst = roots_num_lst + res[task_id][0]
-        roots_den_lst = roots_den_lst + res[task_id][1]
+        roots_num_arr_lst = roots_num_arr_lst + res[task_id][0]
+        roots_den_arr_lst = roots_den_arr_lst + res[task_id][1]
         chi_square_lst = chi_square_lst + res[task_id][2]
-        residues_lst = residues_lst + res[task_id][3]
+        residues_arr_lst = residues_arr_lst + res[task_id][3]
 
-    return [None, roots_num_lst, roots_den_lst, chi_square_lst, residues_lst]
+    return [None, roots_num_arr_lst, roots_den_arr_lst, chi_square_lst, residues_arr_lst]
 
 
 def simplify_roots(roots_num_arr, roots_den_arr, residues_arr, tol_cancellation):
@@ -449,7 +449,7 @@ def simplify_roots(roots_num_arr, roots_den_arr, residues_arr, tol_cancellation)
 def squeeze_roots_lst(
     roots_num_arr_lst,
     roots_den_arr_lst,
-    chi_square_arr_lst,
+    chi_square_lst,
     residues_arr_lst,
     chi_threshold=None,
     tol_cancellation=None,
@@ -463,7 +463,7 @@ def squeeze_roots_lst(
     residues_arr_lst_squeezed = np.array([])
 
     for n in np.arange(len(roots_num_arr_lst)):
-        if chi_threshold is None or chi_square_arr_lst[n] < chi_threshold:
+        if chi_threshold is None or chi_square_lst[n] < chi_threshold:
             if tol_cancellation is None:
                 tmp_a = roots_num_arr_lst[n]
                 tmp_b = roots_den_arr_lst[n]
