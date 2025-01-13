@@ -36,7 +36,7 @@ def get_optimal_eps(data):
     return y[np.argmax(my_dist)]
 
 
-def get_cluster(my_blob, which_cluster="random"):
+def get_cluster(my_blob, which_cluster="random", eps=None):
     """
     Find a cluster.
     """
@@ -46,7 +46,10 @@ def get_cluster(my_blob, which_cluster="random"):
         # my_blob.size must be >= min_samples
         return np.array([])
 
-    clustering = DBSCAN(min_samples=4, eps=get_optimal_eps(X))
+    if eps is None:
+        eps = get_optimal_eps(X)
+
+    clustering = DBSCAN(min_samples=4, eps=eps)
 
     clustering.fit(X)
 
@@ -91,7 +94,7 @@ def get_cluster(my_blob, which_cluster="random"):
 
 
 def apply_filter(
-    sing_in, boundaries=(-np.inf, np.inf, -np.inf, np.inf), which_cluster=None
+    sing_in, boundaries=(-np.inf, np.inf, -np.inf, np.inf), which_cluster=None, eps=None
 ):
     """
     Filter singularities within given boundaries optionally extracting a cluster.
@@ -112,6 +115,6 @@ def apply_filter(
     if len(idx) >= 4:
         sing_out = np.append(sing_out, sing_in[idx])
         if which_cluster is not None and sing_out.size > 0:
-            sing_out = get_cluster(sing_out, which_cluster=which_cluster)
+            sing_out = get_cluster(sing_out, which_cluster=which_cluster, eps=eps)
 
     return sing_out
