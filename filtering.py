@@ -42,6 +42,10 @@ def get_cluster(my_blob, which_cluster="random"):
     """
     X = np.array([[np.real(z), np.imag(z)] for z in my_blob])
 
+    if my_blob.size < 4:
+        # my_blob.size must be >= min_samples
+        return np.array([])
+
     clustering = DBSCAN(min_samples=4, eps=get_optimal_eps(X))
 
     clustering.fit(X)
@@ -105,7 +109,7 @@ def apply_filter(
     idx = np.unique(np.concatenate((idx_a, idx_b, idx_c, idx_d)))
     idx = list(set(idx_a).intersection(idx_b).intersection(idx_c).intersection(idx_d))
 
-    if len(idx) > 0:
+    if len(idx) >= 4:
         sing_out = np.append(sing_out, sing_in[idx])
         if which_cluster is not None and sing_out.size > 0:
             sing_out = get_cluster(sing_out, which_cluster=which_cluster)
