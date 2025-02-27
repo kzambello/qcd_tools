@@ -277,9 +277,9 @@ def fit(
             for i in np.arange(ncoeffs_num + ncoeffs_den):
                 myq[j] = myq[j].subs(C[i], sol[i])
         for j in np.arange(ncoeffs_num):
-            myp[j] = np.float(myp[j])
+            myp[j] = np.float64(myp[j])
         for j in np.arange(ncoeffs_den):
-            myq[j] = np.float(myq[j])
+            myq[j] = np.float64(myq[j])
 
         sol_f0 = sp.lambdify(x, mypq)
         # sol_f1 = sp.lambdify(x, sp.diff(mypq, (x, 1)))
