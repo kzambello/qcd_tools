@@ -1,7 +1,7 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(name='qcd_tools',
     version='0.1.0',
-    packages=find_packages(),
+    packages=['qcd_tools','qcd_tools.external'],
     install_requires=['numpy','scikit-learn','scipy','sympy'],
 )
