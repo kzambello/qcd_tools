@@ -62,6 +62,13 @@ def get_cluster(my_blob, which_cluster="random", eps=None):
     unique_labels, counts = np.unique(good_labels, return_counts=True)
     unique_labels = unique_labels[np.argsort(-counts)[0 : np.min([counts.size, 3])]]
 
+    if which_cluster == "random":
+        ul_rnd = np.random.choice(unique_labels)
+
+        # print(f"ul_rnd = {ul_rnd} unique_labels = {unique_labels}")
+
+        return my_blob[clustering.labels_ == ul_rnd]
+
     ul_min = unique_labels[0]
     for ul in unique_labels:
         old_idx = clustering.labels_ == ul_min
@@ -83,12 +90,8 @@ def get_cluster(my_blob, which_cluster="random", eps=None):
         if new_dist < old_dist:
             ul_min = ul
 
-    ul_rnd = np.random.choice(unique_labels)
 
-    # print(f"ul_min = {ul_min} ul_rnd = {ul_rnd} unique_labels = {unique_labels}")
-
-    if which_cluster == "random":
-        return my_blob[clustering.labels_ == ul_rnd]
+    # print(f"ul_min = {ul_min} unique_labels = {unique_labels}")
 
     return my_blob[clustering.labels_ == ul_min]
 
