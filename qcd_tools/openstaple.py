@@ -21,7 +21,7 @@ mp.dps = 40
 
 
 def do_jk(src, nblocks, my_function=np.mean):
-    """Block jackkinife."""
+    """Block jackknife."""
 
     data = np.copy(src)
 
@@ -47,12 +47,12 @@ def do_jk(src, nblocks, my_function=np.mean):
 
 
 def jk_mean(src, nblocks, my_function=np.mean):
-    """Wrapper for block jackkinife."""
+    """Wrapper for block jackknife."""
     return do_jk(src, nblocks, my_function=my_function)[0]
 
 
 def jk_err(src, nblocks, my_function=np.mean):
-    """Wrapper for block jackkinife."""
+    """Wrapper for block jackknife."""
     return do_jk(src, nblocks, my_function=my_function)[1]
 
 
