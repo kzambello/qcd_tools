@@ -213,6 +213,7 @@ def do_mhist_jack(
     tol_mhist,
     nblocks,
 ):
+    """Multiple histogram reweighting (for TLSM gauge action) with block jackknife."""
 
     nbeta = beta.size
 
@@ -392,11 +393,11 @@ def do_mhist_jack(
         suscplaq_mhist[n] = np.mean(sp)
         bindplaq_mhist[n] = np.mean(bp)
 
-        dplaq_mhist[n] = np.std(p) * np.sqrt(nblocks)
-        dplaq2_mhist[n] = np.std(p2) * np.sqrt(nblocks)
-        dplaq4_mhist[n] = np.std(p4) * np.sqrt(nblocks)
-        dsuscplaq_mhist[n] = np.std(sp) * np.sqrt(nblocks)
-        dbindplaq_mhist[n] = np.std(bp) * np.sqrt(nblocks)
+        dplaq_mhist[n] = np.std(p) * np.sqrt(nblocks-1)
+        dplaq2_mhist[n] = np.std(p2) * np.sqrt(nblocks-1)
+        dplaq4_mhist[n] = np.std(p4) * np.sqrt(nblocks-1)
+        dsuscplaq_mhist[n] = np.std(sp) * np.sqrt(nblocks-1)
+        dbindplaq_mhist[n] = np.std(bp) * np.sqrt(nblocks-1)
 
     return (
         beta_mhist,
