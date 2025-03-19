@@ -1,3 +1,5 @@
+mpmath
+multiprocessing
 numpy
 scikit-learn
 scipy
