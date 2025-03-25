@@ -411,4 +411,9 @@ def do_mhist_jack(
         dsuscplaq_mhist,
         bindplaq_mhist,
         dbindplaq_mhist,
+        plaq_mhist_jack,
+        plaq2_mhist_jack,
+        plaq4_mhist_jack,
+        suscplaq_mhist_jack,
+        bindplaq_mhist_jack
     )
