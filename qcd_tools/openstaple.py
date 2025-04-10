@@ -20,40 +20,41 @@ from mpmath import mp
 mp.dps = 40
 
 
-def do_jk(src, nblocks, my_function=np.mean):
-    """Block jackknife."""
+def ojk(src, nblocks, my_function=np.mean):
+    """Old block jackknife."""
 
     data = np.copy(src)
 
     blocksize = int(data.size / nblocks)
 
     imax = int(np.floor(np.size(data) / blocksize) * blocksize)
-    b = np.reshape(data[0:imax], (-1, blocksize))
+    blocked_data = np.reshape(data[0:imax], (-1, blocksize))
 
-    jksamples = imax / blocksize
+    num_jksamples = imax / blocksize
     jkestimates = []
 
-    for k in np.arange(imax / blocksize):
-        jksample = np.reshape(np.delete(b, int(k), axis=0), (1, -1))[0]
+    for k in np.arange(num_jksamples):
+        jksample = np.reshape(np.delete(blocked_data, int(k), axis=0), (1, -1))[0]
         jkestimates = jkestimates + [my_function(jksample)]
     jkestimates = np.array(jkestimates)
 
     jkmean = np.mean(jkestimates)
     jkerr = np.sqrt(
-        ((jksamples - 1.0) / jksamples) * np.sum((jkestimates - my_function(data)) ** 2)
+        ((num_jksamples - 1.0) / num_jksamples)
+        * np.sum((jkestimates - my_function(data)) ** 2)
     )
 
     return jkmean, jkerr
 
 
-def jk_mean(src, nblocks, my_function=np.mean):
-    """Wrapper for block jackknife."""
-    return do_jk(src, nblocks, my_function=my_function)[0]
+def ojk_mean(src, nblocks, my_function=np.mean):
+    """Wrapper for old block jackknife."""
+    return ojk(src, nblocks, my_function=my_function)[0]
 
 
-def jk_err(src, nblocks, my_function=np.mean):
-    """Wrapper for block jackknife."""
-    return do_jk(src, nblocks, my_function=my_function)[1]
+def ojk_err(src, nblocks, my_function=np.mean):
+    """Wrapper for old block jackknife."""
+    return ojk(src, nblocks, my_function=my_function)[1]
 
 
 def do_mhist(
@@ -393,11 +394,11 @@ def do_mhist_jack(
         suscplaq_mhist[n] = np.mean(sp)
         bindplaq_mhist[n] = np.mean(bp)
 
-        dplaq_mhist[n] = np.std(p) * np.sqrt(nblocks-1)
-        dplaq2_mhist[n] = np.std(p2) * np.sqrt(nblocks-1)
-        dplaq4_mhist[n] = np.std(p4) * np.sqrt(nblocks-1)
-        dsuscplaq_mhist[n] = np.std(sp) * np.sqrt(nblocks-1)
-        dbindplaq_mhist[n] = np.std(bp) * np.sqrt(nblocks-1)
+        dplaq_mhist[n] = np.std(p) * np.sqrt(nblocks - 1)
+        dplaq2_mhist[n] = np.std(p2) * np.sqrt(nblocks - 1)
+        dplaq4_mhist[n] = np.std(p4) * np.sqrt(nblocks - 1)
+        dsuscplaq_mhist[n] = np.std(sp) * np.sqrt(nblocks - 1)
+        dbindplaq_mhist[n] = np.std(bp) * np.sqrt(nblocks - 1)
 
     return (
         beta_mhist,
@@ -415,5 +416,5 @@ def do_mhist_jack(
         plaq2_mhist_jack,
         plaq4_mhist_jack,
         suscplaq_mhist_jack,
-        bindplaq_mhist_jack
+        bindplaq_mhist_jack,
     )
