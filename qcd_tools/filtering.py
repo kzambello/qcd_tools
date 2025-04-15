@@ -43,7 +43,7 @@ def get_cluster(my_blob, which_cluster="random", eps=None):
     X = np.array([[np.real(z), np.imag(z)] for z in my_blob])
 
     if my_blob.size < 4:
-        # my_blob.size must be >= min_samples
+        # my_blob.size must be >= DBSCAN's min_samples
         return np.array([])
 
     if eps is None:
@@ -90,7 +90,6 @@ def get_cluster(my_blob, which_cluster="random", eps=None):
         if new_dist < old_dist:
             ul_min = ul
 
-
     # print(f"ul_min = {ul_min} unique_labels = {unique_labels}")
 
     return my_blob[clustering.labels_ == ul_min]
@@ -106,6 +105,9 @@ def apply_filter(
     if sing_in.size == 0:
         return sing_in
 
+    if sing_in.size == 1 and np.isscalar(sing_in):
+        sing_in = np.array([sing_in])
+
     sing_out = np.array([])
 
     idx_a = np.where(sing_in.imag > boundaries[0])[0]
@@ -115,9 +117,9 @@ def apply_filter(
     idx = np.unique(np.concatenate((idx_a, idx_b, idx_c, idx_d)))
     idx = list(set(idx_a).intersection(idx_b).intersection(idx_c).intersection(idx_d))
 
-    if len(idx) >= 4:
-        sing_out = np.append(sing_out, sing_in[idx])
-        if which_cluster is not None and sing_out.size > 0:
-            sing_out = get_cluster(sing_out, which_cluster=which_cluster, eps=eps)
+    sing_out = np.append(sing_out, sing_in[idx])
+
+    if sing_out.size >= 4 and which_cluster is not None:
+        sing_out = get_cluster(sing_out, which_cluster=which_cluster, eps=eps)
 
     return sing_out
