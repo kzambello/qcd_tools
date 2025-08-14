@@ -352,17 +352,19 @@ def mpfit(
     global my_task
 
     def my_task(my_task_args):
-        [_, roots_num_arr_lst, roots_den_arr_lst, chi_square_lst, residues_arr_lst] = fit(
-            mu_in,
-            chis_in,
-            dchis_in,
-            constraints,
-            ncoeffs_num,
-            ncoeffs_den,
-            nsamples=my_task_args[0],
-            seed=my_task_args[1],
-            nonlinear_fit=nonlinear_fit,
-            verbosity=verbosity,
+        [_, roots_num_arr_lst, roots_den_arr_lst, chi_square_lst, residues_arr_lst] = (
+            fit(
+                mu_in,
+                chis_in,
+                dchis_in,
+                constraints,
+                ncoeffs_num,
+                ncoeffs_den,
+                nsamples=my_task_args[0],
+                seed=my_task_args[1],
+                nonlinear_fit=nonlinear_fit,
+                verbosity=verbosity,
+            )
         )
 
         return [roots_num_arr_lst, roots_den_arr_lst, chi_square_lst, residues_arr_lst]
@@ -404,7 +406,13 @@ def mpfit(
         chi_square_lst = chi_square_lst + res[task_id][2]
         residues_arr_lst = residues_arr_lst + res[task_id][3]
 
-    return [None, roots_num_arr_lst, roots_den_arr_lst, chi_square_lst, residues_arr_lst]
+    return [
+        None,
+        roots_num_arr_lst,
+        roots_den_arr_lst,
+        chi_square_lst,
+        residues_arr_lst,
+    ]
 
 
 def simplify_roots(roots_num_arr, roots_den_arr, residues_arr, tol_cancellation):
@@ -453,9 +461,10 @@ def squeeze_roots_lst(
     residues_arr_lst,
     chi_threshold=None,
     tol_cancellation=None,
+    keep_only_one=None,
 ):
     """
-    Merge zeros/poles from different samples optionally discarding zeros/poles from bad fits and cancelling zero/pole pairs.
+    Merge zeros/poles from different samples optionally discarding zeros/poles from bad fits, cancelling zero/pole pairs, keeping only one pole.
     """
 
     roots_num_arr_lst_squeezed = np.array([])
@@ -475,6 +484,23 @@ def squeeze_roots_lst(
                     residues_arr_lst[n],
                     tol_cancellation,
                 )
+
+            if keep_only_one is not None:
+                idx = np.squeeze(np.argwhere((tmp_b.real > 0) & (tmp_b.imag > 0)))
+                tmp_b = np.array(tmp_b[idx])
+                tmp_c = np.array(tmp_c[idx])
+                if np.size(tmp_b) == 0:
+                    tmp_b = np.array([])
+                    tmp_c = np.array([])
+                else:
+                    if np.size(tmp_b) == 1:
+                        tmp_b = np.array([tmp_b])
+                        tmp_c = np.array([tmp_c])
+                    idx = np.argmin(np.abs(tmp_b - keep_only_one))
+                    tmp_b = np.array(tmp_b[idx])
+                    if np.size(tmp_b) == 0:
+                        tmp_b = np.array([])
+                        tmp_c = np.array([])
 
             roots_num_arr_lst_squeezed = np.append(roots_num_arr_lst_squeezed, tmp_a)
             roots_den_arr_lst_squeezed = np.append(roots_den_arr_lst_squeezed, tmp_b)
