@@ -1,0 +1,3 @@
+cd <PATH_TO_RUNDIR>/SED_DIRNAME/JK20_s"$1"
+
+octave fai_"$OMPI_COMM_WORLD_RANK".m > fai_"$OMPI_COMM_WORLD_RANK".m.out

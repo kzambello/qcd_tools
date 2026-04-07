@@ -1,0 +1,18 @@
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=20
+#SBATCH --cpus-per-task=1
+
+#SBATCH -A <ACCOUNT>
+#SBATCH --mem=64GB
+#SBATCH -p <PARTITION>
+#SBATCH --time 15:59:59
+#SBATCH --job-name=immu
+
+#SBATCH --array=1-SED_NMUS
+
+module load openmpi
+module load spack
+spack load octave
+
+mpirun --bind-to core:overload-allowed -n 20 bash start.sh $SLURM_ARRAY_TASK_ID
